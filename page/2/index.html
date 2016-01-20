@@ -81,294 +81,6 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2016/01/20/2015-11-19-AndroidServiceTest/" title="ServiceTest" itemprop="url">ServiceTest</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="眷恋似水" target="_blank" itemprop="author">眷恋似水</a>
-		
-  <p class="article-time">
-    <time datetime="2016-01-20T10:53:45.436Z" itemprop="datePublished"> 發表於 2016-01-20</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <p>#Learn Android (Service)[day one] .</p>
-<p>##MainActivity.java</p>
-<pre><code>package com.example.administrator.servicetest;
-
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.Binder;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.os.Message;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.EditText;
-import android.widget.TextView;
-
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
-
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, ServiceConnection {
-    private EditText editText;
-    private TextView textView;
-    private Intent intent;
-    private MyService.Binder binder = null;
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, &quot;Replace with your own action&quot;, Snackbar.LENGTH_LONG)
-                        .setAction(&quot;Action&quot;, null).show();
-            }
-        });
-
-
-        textView = (TextView) findViewById(R.id.textView);
-        editText = (EditText) findViewById(R.id.edit);
-
-        findViewById(R.id.stop).setOnClickListener(this);
-        findViewById(R.id.start).setOnClickListener(this);
-        findViewById(R.id.bind).setOnClickListener(this);
-        findViewById(R.id.unbind).setOnClickListener(this);
-        findViewById(R.id.sync).setOnClickListener(this);
-
-        intent = new Intent(MainActivity.this,MyService.class);
-        intent.putExtra(&quot;data&quot;, editText.getText().toString());
-
-
-
-    }
-
-
-    @Override
-    public void onClick(View v) {
-            switch (v.getId()){
-                case R.id.start:
-                    startService(intent);
-                    break;
-                case R.id.stop:
-                    stopService(intent);
-                    break;
-                case R.id.bind:
-                    bindService(intent,this, Context.BIND_AUTO_CREATE);
-                    break;
-                case R.id.unbind:
-                    unbindService(this);
-                    break;
-                case R.id.sync:
-                    if(binder != null){
-                        binder.setData(editText.getText().toString());
-                    }
-                    break;
-
-
-            }
-    }
-
-
-    @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
-        binder = (MyService.Binder) service;
-
-        binder.getService().setCallBack(new MyService.CallBack() {
-            @Override
-            public void onDataChange(String data) {
-                Message msg = new Message();
-                Bundle b = new Bundle();
-                b.putString(&quot;data&quot;,data);
-                msg.setData(b);
-                handler.sendMessage(msg);
-            }
-        });
-    }
-
-    @Override
-    public void onServiceDisconnected(ComponentName name) {
-
-    }
-
-    private android.os.Handler handler = new android.os.Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            textView.setText(msg.getData().getString(&quot;data&quot;));
-        }
-    };
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-}
-</code></pre><p>##MyService.java</p>
-<pre><code>package com.example.administrator.servicetest;
-
-import android.app.Service;
-import android.content.Intent;
-import android.os.Binder;
-import android.os.IBinder;
-
-public class MyService extends Service {
-
-    private static int number = 0;
-    private boolean running = false;
-    private String dataChange = null;
-
-
-    public MyService() {
-
-    }
-    @Override
-    public IBinder onBind(Intent intent) {
-       return new Binder();
-    }
-
-    public class Binder extends android.os.Binder{
-        public void setData(String data){
-            MyService.this.dataChange = data;
-        }
-        public MyService getService(){
-            return MyService.this;
-        }
-    }
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        System.out.println(&quot;start Command&quot;);
-        dataChange = intent.getStringExtra(&quot;data&quot;);
-
-        return super.onStartCommand(intent, flags, startId);
-    }
-    @Override
-    public void onCreate() {
-        System.out.println(&quot;service start!&quot;);
-        super.onCreate();
-
-        new Thread() {
-            @Override
-            public void run() {
-                super.run();
-                running = true;
-
-                while (running) {
-                    String str = number+&quot;:&quot;+dataChange;
-                    System.out.println(str);
-                    if(callBack != null){
-                        callBack.onDataChange(str);
-                    }
-
-                    number++;
-                    try {
-                        sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }.start();
-    }
-    @Override
-    public void onDestroy() {
-
-        super.onDestroy();
-        running = false;
-        System.out.println(&quot;service stop!&quot;);
-    }
-
-    public static interface CallBack{
-        void onDataChange(String data);
-    }
-    private CallBack callBack = null;
-
-    public void setCallBack(CallBack callBack) {
-        this.callBack = callBack;
-    }
-
-    public CallBack getCallBack() {
-        return callBack;
-    }
-}
-</code></pre><p>目前已知Bug或未能实现，前台传入后台数据无法实时更新到前台显示。</p>
-
-        
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/android/">android</a>
-</div>
-
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2016/01/20/2015-11-19-AndroidServiceTest/#comments" class="ds-thread-count comments-count-link" data-thread-key="2016/01/20/2015-11-19-AndroidServiceTest/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand page" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
       <a href="/2016/01/20/2015-11-15-Sugar/" title="Sugar" itemprop="url">Sugar</a>
   </h1>
   <p class="article-author">By
@@ -995,131 +707,6 @@ int main()
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2015/10/28/2015-10-28-summaryOfmyFirstInterview/" title="summary of my first job interview" itemprop="url">summary of my first job interview</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="眷恋似水" target="_blank" itemprop="author">眷恋似水</a>
-		
-  <p class="article-time">
-    <time datetime="2015-10-28T15:58:34.000Z" itemprop="datePublished"> 發表於 2015-10-28</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <p>##数据库事务<br>　　数据库事务(Database Transaction) ，是指作为单个逻辑工作单元执行的一系列操作，要么完全地执行，要么完全地不执行。<br>设想网上购物的一次交易，其付款过程至少包括以下几步数据库操作：</p>
-<ol>
-<li>更新客户所购商品的库存信息</li>
-<li>保存客户付款信息–可能包括与银行系统的交互</li>
-<li>生成订单并且保存到数据库中</li>
-<li>更新用户相关信息，例如购物数量等等</li>
-</ol>
-<p>　　正常的情况下，这些操作将顺利进行，最终交易成功，与交易相关的所有数据库信息也成功地更新。但是，如果在这一系列过程中任何一个环节出了差错，例如在更新商品库存信息时发生异常、该顾客银行帐户存款不足等，都将导致交易失败。一旦交易失败，数据库中所有信息都必须保持交易前的状态不变，比如最后一步更新用户信息时失败而导致交易失败，那么必须保证这笔失败的交易不影响数据库的状态–库存信息没有被更新、用户也没有付款，订单也没有生成。否则，数据库的信息将会一片混乱而不可预测。</p>
-<p>###原子性<br>（Atomic）（Atomicity)</p>
-<p>　　事务必须是原子工作单元；对于其数据修改，要么全都执行，要么全都不执行。通常，与某个事务关联的操作具有共同的目标，并且是相互依赖的。如果系统只执行这些操作的一个子集，则可能会破坏事务的总体目标。原子性消除了系统处理操作子集的可能性。</p>
-<p>###一致性<br>（Consistent）(Consistency)</p>
-<p>　　事务在完成时，必须使所有的数据都保持一致状态。在相关数据库中，所有规则都必须应用于事务的修改，以保持所有数据的完整性。事务结束时，所有的内部数据结构（如 B 树索引或双向链表）都必须是正确的。某些维护一致性的责任由应用程序开发人员承担，他们必须确保应用程序已强制所有已知的完整性约束。例如，当开发用于转帐的应用程序时，应避免在转帐过程中任意移动小数点。</p>
-<p>###隔离性<br>（Insulation）(Isolation)</p>
-<p>　　由并发事务所作的修改必须与任何其它并发事务所作的修改隔离。事务查看数据时数据所处的状态，要么是另一并发事务修改它之前的状态，要么是另一事务修改它之后的状态，事务不会查看中间状态的数据。这称为隔离性，因为它能够重新装载起始数据，并且重播一系列事务，以使数据结束时的状态与原始事务执行的状态相同。当事务可序列化时将获得最高的隔离级别。在此级别上，从一组可并行执行的事务获得的结果与通过连续运行每个事务所获得的结果相同。由于高度隔离会限制可并行执行的事务数，所以一些应用程序降低隔离级别以换取更大的吞吐量。</p>
-<p>###持久性<br>（Duration）(Durability）</p>
-<p>　　事务完成之后，它对于系统的影响是永久性的。该修改即使出现致命的系统故障也将一直保持。</p>
-<p>##3G的国际标准<br>　　国际电信联盟（ITU）在2000年5月确定W-CDMA、CDMA2000、TD-SCDMA以及WiMAX四大主流无线接口标准，写入3G技术指导性文件《2000年国际移动通讯计划》（简称IMT—2000）。 CDMA是Code Division Multiple Access (码分多址)的缩写，是第三代移动通信系统的技术基础。第一代移动通信系统采用频分多址(FDMA)的模拟调制方式，这种系统的主要缺点是频谱利用率低，信令干扰话音业务。第二代移动通信系统主要采用时分多址(TDMA)的数字调制方式，提高了系统容量，并采用独立信道传送信令，使系统性能大为改善，但TDMA的系统容量仍然有限，越区切换性能仍不完善。CDMA系统以其频率规划简单、系统容量大、频率复用系数高、抗多径能力强、通信质量好、软容量、软切换等特点显示出巨大的发展潜力。下面分别介绍一下3G的几种标准：</p>
-<p>###W-CDMA<br>　　也称为WCDMA，全称为Wideband CDMA，也称为CDMA Direct Spread，意为宽频码分多址复用，这是基于GSM网发展出来的3G技术规范，是欧洲提出的宽带CDMA技术，它与日本提出的宽带CDMA技术基本相同，目前正在进一步融合。其支持者主要是以GSM系统为主的欧洲厂商，日本公司也或多或少参与其中，包括欧美的爱立信、阿尔卡特、诺基亚、朗讯、北电，以及日本的NTT、富士通、夏普等厂商。 该标准提出了GSM(2G)-GPRS-EDGE-WCDMA(3G)的演进策略。这套系统能够架设在现有的GSM网络上，对于系统提供商而言可以较轻易地过渡，而GSM系统相当普及的亚洲对这套新技术的接受度预料会相当高。因此W-CDMA具有先天的市场优势。<br>　　中国联通3G标准采用的就是WCDMA</p>
-<p>###CDMA2000<br>　　CDMA2000是由窄带CDMA(CDMA IS95)技术发展而来的宽带CDMA技术，也称为CDMA Multi-Carrier，由美国高通北美公司为主导提出，摩托罗拉、Lucent和后来加入的韩国三星都有参与，韩国现在成为该标准的主导者。这套系统是从窄频CDMAOne数字标准衍生出来的，可以从原有的CDMAOne结构直接升级到3G，建设成本低廉。但目前使用CDMA的地区只有日、韩和北美，所以CDMA2000的支持者不如W-CDMA多。不过CDMA2000的研发技术却是目前各标准中进度最快的，许多3G手机已经率先面世。该标准提出了从CDMA IS95(2G)-CDMA20001x-CDMA20003x(3G)的演进策略。CDMA20001x被称为2.5代移动通信技术。CDMA20003x与CDMA20001x的主要区别在于应用了多路载波技术，通过采用三载波使带宽提高。<br>　　目前中国电信正在采用这一方案向3G过渡，并已建成了CDMA IS95网络。</p>
-<p>###TD-SCDMA<br>　　全称为Time Division - Synchronous CDMA(时分同步CDMA)，该标准是由中国大陆独自制定的3G标准，1999年6月29日，中国原邮电部电信科学技术研究院（大唐电信）向ITU提出。该标准将智能无线、同步CDMA和软件无线电等当今国际领先技术融于其中，在频谱利用率、对业务支持具有灵活性、频率灵活性及成本等方面的独特优势。另外，由于中国内的庞大的市场，该标准受到各大主要电信设备厂商的重视，全球一半以上的设备厂商都宣布可以支持TD—SCDMA标准。 该标准提出不经过2.5代的中间环节，直接向3G过渡，非常适用于GSM系统向3G升级。<br>　　中国移动3G标准采用的就是TD-SCDMA</p>
-<p>###WiMAX<br>　　WiMAX 的全名是微波存取全球互通(Worldwide Interoperability for Microwave Access)，又称为802·16无线城域网，是又一种为企业和家庭用户提供“最后一英里”的宽带无线连接方案。将此技术与需要授权或免授权的微波设备相结合之后，由于成本较低，将扩大宽带无线市场，改善企业与服务供应商的认知度。2007年10月19日，国际电信联盟在日内瓦举行的无线通信全体会议（World Radiocommunication Conferences）上，经过多数国家投票通过，WiMAX正式被批准成为继WCDMA、CDMA2000和TD-SCDMA之后的第四个全球3G标准。</p>
-<p>##typedef和#define的区别</p>
-<p>##程序、进程和线程的区别<br>程序：一组指令的有效集合</p>
-<p>进程：程序的执行就是进程。也可以把进程看成一个独立的程序，在内存中有其对应的代码空间和数据空间，一个进程所拥有的数据和代码只属于自己。进程是资源分配的基本单位，也是调度运行的基本单位。</p>
-<p>线程：线程被人们认为是轻量级的进程，它是进程中单独运行的一路程序。换句话说，就是一个进程可以包含多个线程，并且至少有一个主线程，同时同一进程的线程共享该进程的代码和数据。于此同时，每一个线程又都有自己的堆栈，这些堆栈对于线程来说是私有的。线程是处理机调度的基本单位。</p>
-<p>那为什么要引入线程呢？</p>
-<ol>
-<li>便于调度</li>
-<li>线程可以共享进程的数据和代码，从而比进程需要通过消息才能通信来得更加简单。启动和切换的速度也比进程快。</li>
-<li>具有高并发性，可以启动多个线程执行同程序的不同部分。</li>
-<li>充分利用处理器的功能。让每一个处理器上运行不同线程，从而实现应用程序的并发性。</li>
-</ol>
-<p>程序和进程的区别</p>
-<ol>
-<li>程序是静态的，它知识一组冰冷的指令的集合，不具有任何的运行意义。而进程是程序运行在数据集上的动态过程，进程是一个动态实体，它应创建而产生，应调度执行，应等待资源或者是事件而处于等待状态，应完成了任务而被撤销，它有自己的生命周期，它反应了程序在数据集上运行的全部动态过程。</li>
-<li>进程和程序并不是一一对应的关系，相同的程序运行在不同的数据集上就是不同的进程。</li>
-<li>进程还具有并发性和交往性，而程序却是封闭的。</li>
-</ol>
-<p>进程和线程的区别</p>
-<ol>
-<li>一个进程可以拥有多个线程，而一个线程同时只能被一个进程所拥有。</li>
-<li>进程是资源分配的基本单位，线程是处理机调度的基本单位，所有的线程共享其所属进程的所有资源与代码。</li>
-<li>线程执行过程之中很容易进行协作同步，而进程需要通过消息通信进行同步。</li>
-<li>线程的划分尺度更小，并发性更高。</li>
-<li>线程共享进程的数据的同时，有自己私有的的堆栈。</li>
-<li>线程不能单独执行，但是每一个线程都有程序的入口、执行序列以及程序出口。它必须组成进程才能被执行。</li>
-</ol>
-<p>##TCP/IP各层的作用</p>
-<p>##路由器与交换机的区别</p>
-<ol>
-<li>路由器工作于OSI模型的网络层，能够识别IP地址，并根据IP地址转发数据包，并维护着路由表，能够基于路由表进行最佳路线选择；</li>
-<li>路由器上还能开启ACL访问控制列表、NAT地址转换等功能，扩展网络应用,；</li>
-<li>传统交换机工作于OSI模型的数据链路层，能够识别MAC地址，根据MAC地址转发数据帧，并维护着一张桥表，根据桥表上MAC地址和端口的对应关系进行数据帧转发。</li>
-<li>交换机能够隔离冲突域，并划分VLAN。</li>
-</ol>
-<p>##打印9*9乘法表</p>
-<pre><code>#include &lt;stdio.h&gt;
-main (){
-  int i,j,k;
-    for (i=1;i&lt;10;i++){
-        for (j=1;j&lt;=i;j++){
-         k=j*i;
-         printf (&quot;%d*%d=%d\t&quot;,j,i,k);
-         }
-         printf (&quot;\n&quot;);
-       }
-       system (&quot;pause&quot;);
-      }
-</code></pre>
-        
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/IT/">IT</a>
-</div>
-
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-	  	<span></span>
-		<a href="/2015/10/28/2015-10-28-summaryOfmyFirstInterview/#comments" class="ds-thread-count comments-count-link" data-thread-key="2015/10/28/2015-10-28-summaryOfmyFirstInterview/" data-count-type="comments">&nbsp;</a>
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
       <a href="/2015/10/28/2015-10-29-netstat&awk/" title="netatat &amp; awk" itemprop="url">netatat &amp; awk</a>
   </h1>
   <p class="article-author">By
@@ -1355,6 +942,336 @@ cat access.log|awk &apos;{counts[$(11)]+=1}; END {for(url in counts) print count
 	
 	  	<span></span>
 		<a href="/2015/10/28/2015-10-29-netstat&awk/#comments" class="ds-thread-count comments-count-link" data-thread-key="2015/10/28/2015-10-29-netstat&awk/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2015/10/28/2015-10-28-summaryOfmyFirstInterview/" title="summary of my first job interview" itemprop="url">summary of my first job interview</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="眷恋似水" target="_blank" itemprop="author">眷恋似水</a>
+		
+  <p class="article-time">
+    <time datetime="2015-10-28T15:58:34.000Z" itemprop="datePublished"> 發表於 2015-10-28</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p>##数据库事务<br>　　数据库事务(Database Transaction) ，是指作为单个逻辑工作单元执行的一系列操作，要么完全地执行，要么完全地不执行。<br>设想网上购物的一次交易，其付款过程至少包括以下几步数据库操作：</p>
+<ol>
+<li>更新客户所购商品的库存信息</li>
+<li>保存客户付款信息–可能包括与银行系统的交互</li>
+<li>生成订单并且保存到数据库中</li>
+<li>更新用户相关信息，例如购物数量等等</li>
+</ol>
+<p>　　正常的情况下，这些操作将顺利进行，最终交易成功，与交易相关的所有数据库信息也成功地更新。但是，如果在这一系列过程中任何一个环节出了差错，例如在更新商品库存信息时发生异常、该顾客银行帐户存款不足等，都将导致交易失败。一旦交易失败，数据库中所有信息都必须保持交易前的状态不变，比如最后一步更新用户信息时失败而导致交易失败，那么必须保证这笔失败的交易不影响数据库的状态–库存信息没有被更新、用户也没有付款，订单也没有生成。否则，数据库的信息将会一片混乱而不可预测。</p>
+<p>###原子性<br>（Atomic）（Atomicity)</p>
+<p>　　事务必须是原子工作单元；对于其数据修改，要么全都执行，要么全都不执行。通常，与某个事务关联的操作具有共同的目标，并且是相互依赖的。如果系统只执行这些操作的一个子集，则可能会破坏事务的总体目标。原子性消除了系统处理操作子集的可能性。</p>
+<p>###一致性<br>（Consistent）(Consistency)</p>
+<p>　　事务在完成时，必须使所有的数据都保持一致状态。在相关数据库中，所有规则都必须应用于事务的修改，以保持所有数据的完整性。事务结束时，所有的内部数据结构（如 B 树索引或双向链表）都必须是正确的。某些维护一致性的责任由应用程序开发人员承担，他们必须确保应用程序已强制所有已知的完整性约束。例如，当开发用于转帐的应用程序时，应避免在转帐过程中任意移动小数点。</p>
+<p>###隔离性<br>（Insulation）(Isolation)</p>
+<p>　　由并发事务所作的修改必须与任何其它并发事务所作的修改隔离。事务查看数据时数据所处的状态，要么是另一并发事务修改它之前的状态，要么是另一事务修改它之后的状态，事务不会查看中间状态的数据。这称为隔离性，因为它能够重新装载起始数据，并且重播一系列事务，以使数据结束时的状态与原始事务执行的状态相同。当事务可序列化时将获得最高的隔离级别。在此级别上，从一组可并行执行的事务获得的结果与通过连续运行每个事务所获得的结果相同。由于高度隔离会限制可并行执行的事务数，所以一些应用程序降低隔离级别以换取更大的吞吐量。</p>
+<p>###持久性<br>（Duration）(Durability）</p>
+<p>　　事务完成之后，它对于系统的影响是永久性的。该修改即使出现致命的系统故障也将一直保持。</p>
+<p>##3G的国际标准<br>　　国际电信联盟（ITU）在2000年5月确定W-CDMA、CDMA2000、TD-SCDMA以及WiMAX四大主流无线接口标准，写入3G技术指导性文件《2000年国际移动通讯计划》（简称IMT—2000）。 CDMA是Code Division Multiple Access (码分多址)的缩写，是第三代移动通信系统的技术基础。第一代移动通信系统采用频分多址(FDMA)的模拟调制方式，这种系统的主要缺点是频谱利用率低，信令干扰话音业务。第二代移动通信系统主要采用时分多址(TDMA)的数字调制方式，提高了系统容量，并采用独立信道传送信令，使系统性能大为改善，但TDMA的系统容量仍然有限，越区切换性能仍不完善。CDMA系统以其频率规划简单、系统容量大、频率复用系数高、抗多径能力强、通信质量好、软容量、软切换等特点显示出巨大的发展潜力。下面分别介绍一下3G的几种标准：</p>
+<p>###W-CDMA<br>　　也称为WCDMA，全称为Wideband CDMA，也称为CDMA Direct Spread，意为宽频码分多址复用，这是基于GSM网发展出来的3G技术规范，是欧洲提出的宽带CDMA技术，它与日本提出的宽带CDMA技术基本相同，目前正在进一步融合。其支持者主要是以GSM系统为主的欧洲厂商，日本公司也或多或少参与其中，包括欧美的爱立信、阿尔卡特、诺基亚、朗讯、北电，以及日本的NTT、富士通、夏普等厂商。 该标准提出了GSM(2G)-GPRS-EDGE-WCDMA(3G)的演进策略。这套系统能够架设在现有的GSM网络上，对于系统提供商而言可以较轻易地过渡，而GSM系统相当普及的亚洲对这套新技术的接受度预料会相当高。因此W-CDMA具有先天的市场优势。<br>　　中国联通3G标准采用的就是WCDMA</p>
+<p>###CDMA2000<br>　　CDMA2000是由窄带CDMA(CDMA IS95)技术发展而来的宽带CDMA技术，也称为CDMA Multi-Carrier，由美国高通北美公司为主导提出，摩托罗拉、Lucent和后来加入的韩国三星都有参与，韩国现在成为该标准的主导者。这套系统是从窄频CDMAOne数字标准衍生出来的，可以从原有的CDMAOne结构直接升级到3G，建设成本低廉。但目前使用CDMA的地区只有日、韩和北美，所以CDMA2000的支持者不如W-CDMA多。不过CDMA2000的研发技术却是目前各标准中进度最快的，许多3G手机已经率先面世。该标准提出了从CDMA IS95(2G)-CDMA20001x-CDMA20003x(3G)的演进策略。CDMA20001x被称为2.5代移动通信技术。CDMA20003x与CDMA20001x的主要区别在于应用了多路载波技术，通过采用三载波使带宽提高。<br>　　目前中国电信正在采用这一方案向3G过渡，并已建成了CDMA IS95网络。</p>
+<p>###TD-SCDMA<br>　　全称为Time Division - Synchronous CDMA(时分同步CDMA)，该标准是由中国大陆独自制定的3G标准，1999年6月29日，中国原邮电部电信科学技术研究院（大唐电信）向ITU提出。该标准将智能无线、同步CDMA和软件无线电等当今国际领先技术融于其中，在频谱利用率、对业务支持具有灵活性、频率灵活性及成本等方面的独特优势。另外，由于中国内的庞大的市场，该标准受到各大主要电信设备厂商的重视，全球一半以上的设备厂商都宣布可以支持TD—SCDMA标准。 该标准提出不经过2.5代的中间环节，直接向3G过渡，非常适用于GSM系统向3G升级。<br>　　中国移动3G标准采用的就是TD-SCDMA</p>
+<p>###WiMAX<br>　　WiMAX 的全名是微波存取全球互通(Worldwide Interoperability for Microwave Access)，又称为802·16无线城域网，是又一种为企业和家庭用户提供“最后一英里”的宽带无线连接方案。将此技术与需要授权或免授权的微波设备相结合之后，由于成本较低，将扩大宽带无线市场，改善企业与服务供应商的认知度。2007年10月19日，国际电信联盟在日内瓦举行的无线通信全体会议（World Radiocommunication Conferences）上，经过多数国家投票通过，WiMAX正式被批准成为继WCDMA、CDMA2000和TD-SCDMA之后的第四个全球3G标准。</p>
+<p>##typedef和#define的区别</p>
+<p>##程序、进程和线程的区别<br>程序：一组指令的有效集合</p>
+<p>进程：程序的执行就是进程。也可以把进程看成一个独立的程序，在内存中有其对应的代码空间和数据空间，一个进程所拥有的数据和代码只属于自己。进程是资源分配的基本单位，也是调度运行的基本单位。</p>
+<p>线程：线程被人们认为是轻量级的进程，它是进程中单独运行的一路程序。换句话说，就是一个进程可以包含多个线程，并且至少有一个主线程，同时同一进程的线程共享该进程的代码和数据。于此同时，每一个线程又都有自己的堆栈，这些堆栈对于线程来说是私有的。线程是处理机调度的基本单位。</p>
+<p>那为什么要引入线程呢？</p>
+<ol>
+<li>便于调度</li>
+<li>线程可以共享进程的数据和代码，从而比进程需要通过消息才能通信来得更加简单。启动和切换的速度也比进程快。</li>
+<li>具有高并发性，可以启动多个线程执行同程序的不同部分。</li>
+<li>充分利用处理器的功能。让每一个处理器上运行不同线程，从而实现应用程序的并发性。</li>
+</ol>
+<p>程序和进程的区别</p>
+<ol>
+<li>程序是静态的，它知识一组冰冷的指令的集合，不具有任何的运行意义。而进程是程序运行在数据集上的动态过程，进程是一个动态实体，它应创建而产生，应调度执行，应等待资源或者是事件而处于等待状态，应完成了任务而被撤销，它有自己的生命周期，它反应了程序在数据集上运行的全部动态过程。</li>
+<li>进程和程序并不是一一对应的关系，相同的程序运行在不同的数据集上就是不同的进程。</li>
+<li>进程还具有并发性和交往性，而程序却是封闭的。</li>
+</ol>
+<p>进程和线程的区别</p>
+<ol>
+<li>一个进程可以拥有多个线程，而一个线程同时只能被一个进程所拥有。</li>
+<li>进程是资源分配的基本单位，线程是处理机调度的基本单位，所有的线程共享其所属进程的所有资源与代码。</li>
+<li>线程执行过程之中很容易进行协作同步，而进程需要通过消息通信进行同步。</li>
+<li>线程的划分尺度更小，并发性更高。</li>
+<li>线程共享进程的数据的同时，有自己私有的的堆栈。</li>
+<li>线程不能单独执行，但是每一个线程都有程序的入口、执行序列以及程序出口。它必须组成进程才能被执行。</li>
+</ol>
+<p>##TCP/IP各层的作用</p>
+<p>##路由器与交换机的区别</p>
+<ol>
+<li>路由器工作于OSI模型的网络层，能够识别IP地址，并根据IP地址转发数据包，并维护着路由表，能够基于路由表进行最佳路线选择；</li>
+<li>路由器上还能开启ACL访问控制列表、NAT地址转换等功能，扩展网络应用,；</li>
+<li>传统交换机工作于OSI模型的数据链路层，能够识别MAC地址，根据MAC地址转发数据帧，并维护着一张桥表，根据桥表上MAC地址和端口的对应关系进行数据帧转发。</li>
+<li>交换机能够隔离冲突域，并划分VLAN。</li>
+</ol>
+<p>##打印9*9乘法表</p>
+<pre><code>#include &lt;stdio.h&gt;
+main (){
+  int i,j,k;
+    for (i=1;i&lt;10;i++){
+        for (j=1;j&lt;=i;j++){
+         k=j*i;
+         printf (&quot;%d*%d=%d\t&quot;,j,i,k);
+         }
+         printf (&quot;\n&quot;);
+       }
+       system (&quot;pause&quot;);
+      }
+</code></pre>
+        
+        
+        <p class="article-more-link">
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/IT/">IT</a>
+</div>
+
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+	  	<span></span>
+		<a href="/2015/10/28/2015-10-28-summaryOfmyFirstInterview/#comments" class="ds-thread-count comments-count-link" data-thread-key="2015/10/28/2015-10-28-summaryOfmyFirstInterview/" data-count-type="comments">&nbsp;</a>
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2015/10/18/2015-10-19-android/" title="Android!" itemprop="url">Android!</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="眷恋似水" target="_blank" itemprop="author">眷恋似水</a>
+		
+  <p class="article-time">
+    <time datetime="2015-10-17T18:18:23.000Z" itemprop="datePublished"> 發表於 2015-10-18</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h1 id="Android_u7A0B_u5E8F_u5458_u7B80_u5386_u6A21_u677F"><a href="#Android_u7A0B_u5E8F_u5458_u7B80_u5386_u6A21_u677F" class="headerlink" title="Android程序员简历模板"></a>Android程序员简历模板</h1><p>本简历模板由国内首家互联网人才拍卖网站「 <a href="http://www.jobdeer.com" target="_blank" rel="external">JobDeer.com</a> 」提供。</p>
+<p>（括号里的是我们的顾问编写的说明，建议在简历书写完成后统一删除）</p>
+<h2 id="u5148_u8BB2_u8BB2_u600E_u6837_u624D_u662F_u4E00_u4EFD_u597D_u7684_u6280_u672F_u7B80_u5386"><a href="#u5148_u8BB2_u8BB2_u600E_u6837_u624D_u662F_u4E00_u4EFD_u597D_u7684_u6280_u672F_u7B80_u5386" class="headerlink" title="先讲讲怎样才是一份好的技术简历"></a>先讲讲怎样才是一份好的技术简历</h2><p>首先，一份好的简历不光说明事实，更通过FAB模式来增强其说服力。</p>
+<ul>
+<li>Feature：是什么</li>
+<li>Advantage：比别人好在哪些地方</li>
+<li>Benefit：如果雇佣你，招聘方会得到什么好处 </li>
+</ul>
+<p>其次，写简历和写议论文不同，过分的论证会显得自夸，反而容易引起反感，所以要点到为止。这里的技巧是，提供论据，把论点留给阅读简历的人自己去得出。放论据要具体，最基本的是要数字化，好的论据要让人印象深刻。</p>
+<p>举个例子，下边内容是虚构的：</p>
+<p>2006年，我参与了手机XX网发布系统WAPCMS的开发（<code>这部分是大家都会写的</code>）。作为核心程序员，我不但完成了网站界面、调度队列的开发工作，更提出了高效的组件级缓存系统，通过碎片化缓冲有效的提升了系统的渲染效率。（<code>这部分是很多同学忘掉的，要写出你在这个项目中具体负责的部分，以及你贡献出来的价值。</code>）在该系统上线后，Web前端性能从10QPS提升到200QPS，服务器由10台减少到3台（<code>通过量化的数字来增强可信度</code>）。2008年我升任WAPCMS项目负责人，带领一个3人小组支持着每天超过2亿的PV（<code>这就是Benefit。你能带给前雇主的价值，也就是你能带给新雇主的价值。</code>）。</p>
+<p>有同学问，如果我在项目里边没有那么显赫的成绩可以说怎么办？讲不出成绩时，就讲你的成长。因为学习能力也是每家公司都看中的东西。你可以写你在这个项目里边遇到了一个什么样的问题，别人怎么解决的，你怎么解决的，你的方案好在什么地方，最终这个方案的效果如何。</p>
+<p>具体、量化、有说服力，是技术简历特别需要注重的地方。</p>
+<p>（以上内容在写完简历后，对每一段进行评估，完成后再删除）</p>
+<hr>
+<h1 id="u8054_u7CFB_u65B9_u5F0F"><a href="#u8054_u7CFB_u65B9_u5F0F" class="headerlink" title="联系方式"></a>联系方式</h1><p>（HR会打印你的简历，用于在面试的时候联系，所以联系方式放到最上边会比较方便）</p>
+<ul>
+<li>手机：135<strong><em>**</em></strong> （<code>如果是外地手机，可注明。如经常关机，要写上最优联系时间</code>）</li>
+<li>Email：goodman@gmail.com （<code>虽然我觉得QQ邮箱无所谓，不过有些技术人员比较反感，建议用G</code>）</li>
+<li>QQ/微信号：6<strong><em>*</em></strong>（<code>提供一个通过网络可以联系到你的方式</code>）</li>
+</ul>
+<hr>
+<h1 id="u4E2A_u4EBA_u4FE1_u606F"><a href="#u4E2A_u4EBA_u4FE1_u606F" class="headerlink" title="个人信息"></a>个人信息</h1><ul>
+<li>胶布帝/男/1990 </li>
+<li>本科/萌鹿大学计算机系 </li>
+<li>工作年限：3年</li>
+<li>微博：<a href="http://weibo.com/jobdeer" target="_blank" rel="external">@JobDeer</a> （<code>如果没有技术相关内容，也可以不放</code>）</li>
+<li>技术博客：<a href="http://blog.github.io" target="_blank" rel="external">http://blog.github.io</a> ( <code>使用GitHub Host的Big较高</code>  )</li>
+<li><p>GitHub: <a href="http://github.com/geekcompany" target="_blank" rel="external">http://github.com/geekcompany</a> ( <code>有原创repo的GitHub帐号会极大的提升你的个人品牌</code>  )</p>
+</li>
+<li><p>期望职位：Android高级程序员，应用架构师</p>
+</li>
+<li>期望薪资：税前月薪15k~20k，特别喜欢的公司可例外</li>
+<li>期望城市：北京</li>
+</ul>
+<hr>
+<h1 id="u5DE5_u4F5C_u7ECF_u5386"><a href="#u5DE5_u4F5C_u7ECF_u5386" class="headerlink" title="工作经历"></a>工作经历</h1><p>（工作经历按逆序排列，最新的在最前边，按公司做一级分组，公司内按二级分组）</p>
+<h2 id="ABC_u516C_u53F8__uFF08_2012_u5E749_u6708__7E_2014_u5E749_u6708__uFF09"><a href="#ABC_u516C_u53F8__uFF08_2012_u5E749_u6708__7E_2014_u5E749_u6708__uFF09" class="headerlink" title="ABC公司 （ 2012年9月 ~ 2014年9月 ）"></a>ABC公司 （ 2012年9月 ~ 2014年9月 ）</h2><h3 id="DEF_u9879_u76EE"><a href="#DEF_u9879_u76EE" class="headerlink" title="DEF项目"></a>DEF项目</h3><p>我在此项目负责了哪些工作，分别在哪些地方做得出色/和别人不一样/成长快，这个项目中，我最困难的问题是什么，我采取了什么措施，最后结果如何。这个项目中，我最自豪的技术细节是什么，为什么，实施前和实施后的数据对比如何，同事和领导对此的反应如何。</p>
+<h3 id="GHI_u9879_u76EE"><a href="#GHI_u9879_u76EE" class="headerlink" title="GHI项目"></a>GHI项目</h3><p>我在此项目负责了哪些工作，分别在哪些地方做得出色/和别人不一样/成长快，这个项目中，我最困难的问题是什么，我采取了什么措施，最后结果如何。这个项目中，我最自豪的技术细节是什么，为什么，实施前和实施后的数据对比如何，同事和领导对此的反应如何。</p>
+<h3 id="u5176_u4ED6_u9879_u76EE"><a href="#u5176_u4ED6_u9879_u76EE" class="headerlink" title="其他项目"></a>其他项目</h3><p>（每个公司写2~3个核心项目就好了，如果你有非常大量的项目，那么按分类进行合并，每一类选一个典型写出来。其他的一笔带过即可。）</p>
+<h2 id="JKL_u516C_u53F8__uFF08_2010_u5E743_u6708__7E_2012_u5E748_u6708__uFF09"><a href="#JKL_u516C_u53F8__uFF08_2010_u5E743_u6708__7E_2012_u5E748_u6708__uFF09" class="headerlink" title="JKL公司 （ 2010年3月 ~ 2012年8月 ）"></a>JKL公司 （ 2010年3月 ~ 2012年8月 ）</h2><h3 id="MNO_u9879_u76EE"><a href="#MNO_u9879_u76EE" class="headerlink" title="MNO项目"></a>MNO项目</h3><p>我在此项目负责了哪些工作，分别在哪些地方做得出色/和别人不一样/成长快，这个项目中，我最困难的问题是什么，我采取了什么措施，最后结果如何。这个项目中，我最自豪的技术细节是什么，为什么，实施前和实施后的数据对比如何，同事和领导对此的反应如何。</p>
+<h3 id="PQR_u9879_u76EE"><a href="#PQR_u9879_u76EE" class="headerlink" title="PQR项目"></a>PQR项目</h3><p>我在此项目负责了哪些工作，分别在哪些地方做得出色/和别人不一样/成长快，这个项目中，我最困难的问题是什么，我采取了什么措施，最后结果如何。这个项目中，我最自豪的技术细节是什么，为什么，实施前和实施后的数据对比如何，同事和领导对此的反应如何。</p>
+<h3 id="u5176_u4ED6_u9879_u76EE-1"><a href="#u5176_u4ED6_u9879_u76EE-1" class="headerlink" title="其他项目"></a>其他项目</h3><p>（每个公司写2~3个核心项目就好了，如果你有非常大量的项目，那么按分类进行合并，每一类选一个典型写出来。其他的一笔带过即可。）</p>
+<hr>
+<h1 id="u5F00_u6E90_u9879_u76EE_u548C_u4F5C_u54C1"><a href="#u5F00_u6E90_u9879_u76EE_u548C_u4F5C_u54C1" class="headerlink" title="开源项目和作品"></a>开源项目和作品</h1><p>（这一段用于放置工作以外的、可证明你的能力的材料）</p>
+<h2 id="u5F00_u6E90_u9879_u76EE"><a href="#u5F00_u6E90_u9879_u76EE" class="headerlink" title="开源项目"></a>开源项目</h2><p>（对于程序员来讲，没有什么比Show me the code能有说服力了）</p>
+<ul>
+<li><a href="http://github.com/yourname/projectname" target="_blank" rel="external">STU</a> : 项目的简要说明，Star和Fork数多的可以注明</li>
+<li><a href="http://github.com/yourname/projectname" target="_blank" rel="external">WXYZ</a> : 项目的简要说明，Star和Fork数多的可以注明</li>
+</ul>
+<h2 id="u6280_u672F_u6587_u7AE0"><a href="#u6280_u672F_u6587_u7AE0" class="headerlink" title="技术文章"></a>技术文章</h2><p>（挑选你写作或翻译的技术文章，好的文章可以从侧面证实你的表达和沟通能力，也帮助招聘方更了解你）</p>
+<ul>
+<li><a href="http://get.jobdeer.com/706.get" target="_blank" rel="external">一个产品经理眼中的云计算：前生今世和未来</a></li>
+<li><a href="http://get.jobdeer.com/343.get" target="_blank" rel="external">来自HeroKu的HTTP API 设计指南(翻译文章)</a> （ <code>好的翻译文章可以侧证你对英文技术文档的阅读能力</code>）</li>
+</ul>
+<h2 id="u6F14_u8BB2_u548C_u8BB2_u4E49"><a href="#u6F14_u8BB2_u548C_u8BB2_u4E49" class="headerlink" title="演讲和讲义"></a>演讲和讲义</h2><p>（放置你代表公司在一些技术会议上做过的演讲，以及你在公司分享时制作的讲义）</p>
+<ul>
+<li>2014架构师大会演讲：<a href="http://jobdeer.com" target="_blank" rel="external">如何通过Docker优化内部开发</a><ul>
+<li>9月公司内部分享：<a href="http://jobdeer.com" target="_blank" rel="external">云计算的前生今世</a></li>
+</ul>
+</li>
+</ul>
+<h1 id="u6280_u80FD_u6E05_u5355"><a href="#u6280_u80FD_u6E05_u5355" class="headerlink" title="技能清单"></a>技能清单</h1><p>（我一般主张将技能清单写入到工作经历里边去。不过很难完整，所以有这么一段也不错）</p>
+<p>以下均为我熟练使用的技能</p>
+<ul>
+<li>Web开发：PHP/Hack/Node</li>
+<li>Web框架：ThinkPHP/Yaf/Yii/Lavaral/LazyPHP</li>
+<li>前端框架：Bootstrap/AngularJS/EmberJS/HTML5/Cocos2dJS/ionic</li>
+<li>前端工具：Bower/Gulp/SaSS/LeSS/PhoneGap</li>
+<li>数据库相关：MySQL/PgSQL/PDO/SQLite</li>
+<li>版本管理、文档和自动化部署工具：Svn/Git/PHPDoc/Phing/Composer</li>
+<li>单元测试：PHPUnit/SimpleTest/Qunit</li>
+<li>云和开放平台：SAE/BAE/AWS/微博开放平台/微信应用开发</li>
+</ul>
+<h2 id="u53C2_u8003_u6280_u80FD_u5173_u952E_u5B57"><a href="#u53C2_u8003_u6280_u80FD_u5173_u952E_u5B57" class="headerlink" title="参考技能关键字"></a>参考技能关键字</h2><p>本技能关键字列表是从最近招聘Android的数百份JD中统计出来的，括号中是出现的词频。如果你的简历要投递给有机器（简历分选系统）和不如机器（不懂技术的HR）筛选简历环节的地方，请一定从下边高频关键词中选择5～10个适合你自己的。</p>
+<ul>
+<li>android(1830)</li>
+<li>java(386)</li>
+<li>ui(180)</li>
+<li>app(178)</li>
+<li>http(149)</li>
+<li>sdk(135)</li>
+<li>tcp(95)</li>
+<li>socket(93)</li>
+<li>api(60)</li>
+<li>xml(48)</li>
+<li>framework(48)</li>
+<li>eclipse(41)</li>
+<li>linux(38)</li>
+<li>json(28)</li>
+<li>ndk(27)</li>
+<li>ios(27)</li>
+<li>sqlite(26)</li>
+<li>andriod(25) 2%的HR把android给写错了 T_T</li>
+<li>html5(25)</li>
+<li>web(23)</li>
+<li>github(21)</li>
+<li>jni(20)</li>
+<li>svn(15)</li>
+<li>gui(14)</li>
+<li>git(13)</li>
+<li>wifi(10)</li>
+<li>3g(10)</li>
+<li>j2me(10)</li>
+<li>mysql(10)</li>
+<li>oracle(9)</li>
+<li>html(9)</li>
+<li>sql(8)</li>
+<li>tv(8)</li>
+<li>mvc(8)</li>
+<li>lbs(8)</li>
+<li>code review(7)</li>
+<li>im(7)</li>
+<li>mobile(6)</li>
+<li>view(6)</li>
+<li>stackoverflow(6)</li>
+<li>xmpp(6)</li>
+<li>o2o(5)</li>
+<li>ue(5)</li>
+<li>objective(5)</li>
+<li>js(5)</li>
+<li>blog(5)</li>
+<li>andorid(5)</li>
+<li>rom(5)</li>
+<li>launcher(5)</li>
+<li>restful(5)</li>
+<li>webservice(4)</li>
+<li>apk(4)</li>
+<li>androidsdk(4)</li>
+<li>oo(4)</li>
+<li>javascript(4)</li>
+<li>j2ee(4)</li>
+<li>opengl(4)</li>
+<li>uml(4)</li>
+<li>sms(3)</li>
+<li>windows(3)</li>
+<li>market(3)</li>
+<li>audio(3)</li>
+<li>httptps(3)</li>
+<li>udp(3)</li>
+<li>store(3)</li>
+<li>php(3)</li>
+<li>unity3d(3)</li>
+<li>native(3)</li>
+<li>webview(3)</li>
+</ul>
+<hr>
+<h1 id="u81F4_u8C22"><a href="#u81F4_u8C22" class="headerlink" title="致谢"></a>致谢</h1><p>感谢您花时间阅读我的简历，期待能有机会和您共事。</p>
+
+        
+        
+        <p class="article-more-link">
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/IT/">IT</a>
+</div>
+
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+	  	<span></span>
+		<a href="/2015/10/18/2015-10-19-android/#comments" class="ds-thread-count comments-count-link" data-thread-key="2015/10/18/2015-10-19-android/" data-count-type="comments">&nbsp;</a>
 	
 </div>
 
