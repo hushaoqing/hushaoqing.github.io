@@ -3,13 +3,20 @@
 <head>
   <meta charset="utf-8">
   
-  <title>about | 眷恋似水</title>
+  <title>replaceBlank | 眷恋似水</title>
   <meta name="author" content="眷恋似水">
+  
+  <meta name="description" content="##题目：请实现一个函数，把字符串中的空格替换成%20.例如输入“we are happy.”，输出“we%20are%20happy.”
+###时间复杂度为O（n）的解法:
+#include &amp;lt;iostream&amp;gt;
+using namespace std;
+
+//length是字符数组s">
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="about"/>
+  <meta property="og:title" content="replaceBlank"/>
   <meta property="og:site_name" content="眷恋似水"/>
 
   
@@ -113,15 +120,74 @@
 			<!-- index -->
 		   
 
-			  		<h2>about</h2>
+			  		<h2>replaceBlank</h2>
 					
 					<div>
-						<span class="post-time">2016-01-20 18:46:30</span>
+						<span class="post-time">2015-10-29 15:58:34</span>
 					</div>	
 					
 
 					<div class="article-content">
-						
+						<p>##题目：<br>请实现一个函数，把字符串中的空格替换成%20.例如输入“we are happy.”，输出“we%20are%20happy.”</p>
+<p>###时间复杂度为O（n）的解法:</p>
+<pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+//length是字符数组string的总容量
+void RepalceBlank(char string[],int length)
+{
+if(string == NULL &amp;&amp; length &lt;= 0)
+{
+  return;
+}
+int originalLength = 0;
+int numberOfBlank = 0;
+int i = 0;
+while (string[i] != &apos;\0&apos;)
+{
+
+//originalLength是字符串string的真实长度
+++originalLength;
+if (string[i] == &apos; &apos;)
+{
+   ++numberOfBlank;
+}
+++i;
+}
+int newLength = originalLength + numberOfBlank * 2;
+if (newLength &gt; length)
+{
+return;
+}
+
+int indexOfOriginal = originalLength;
+int indexOfNew = newLength;
+while (indexOfOriginal &gt;= 0 &amp;&amp; indexOfNew &gt;  indexOfOriginal)
+{
+ if (string[indexOfOriginal] == &apos; &apos;)
+ {
+   string[indexOfNew -- ] = &apos;0&apos;;
+   string[indexOfNew -- ] = &apos;2&apos;;
+   string[indexOfNew -- ] = &apos;%&apos;;
+ }
+ else
+ {
+   string[indexOfNew -- ] = string[indexOfOriginal];
+ }
+ -- indexOfOriginal;
+}
+}
+
+int main()
+{
+    char string[] = &quot;we are happy.&quot;;
+    int length = 18;
+    cout&lt;&lt;string&lt;&lt;endl;
+    RepalceBlank(string,length);
+    cout&lt;&lt;string&lt;&lt;endl;
+    return 0;
+}
+</code></pre>
 					</div>
 
 			  <!-- about -->
@@ -135,7 +201,7 @@
   
   
    <!-- 多说评论框 start -->
-    <div class="ds-thread" data-thread-key="about/index.md" data-title="about" data-url="http://beautygirl.ren/about/index.html"></div>
+    <div class="ds-thread" data-thread-key="_posts/2015-10-29-repalceBlank.md" data-title="replaceBlank" data-url="http://beautygirl.ren/2015/10/29/2015-10-29-repalceBlank/"></div>
     <!-- 多说评论框 end -->
    <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
     <script type="text/javascript">

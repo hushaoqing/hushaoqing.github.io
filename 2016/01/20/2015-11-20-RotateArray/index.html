@@ -3,13 +3,15 @@
 <head>
   <meta charset="utf-8">
   
-  <title>about | 眷恋似水</title>
+  <title>Rotate Array | 眷恋似水</title>
   <meta name="author" content="眷恋似水">
+  
+  <meta name="description" content="Problem: Rotate an array of n elements to the right by k steps. For example, with n = 7 and k = 3, the array [1,2,3,4,5,6,7] is rotated to [5,6,7,1,2,">
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="about"/>
+  <meta property="og:title" content="Rotate Array"/>
   <meta property="og:site_name" content="眷恋似水"/>
 
   
@@ -113,15 +115,81 @@
 			<!-- index -->
 		   
 
-			  		<h2>about</h2>
+			  		<h2>Rotate Array</h2>
 					
 					<div>
-						<span class="post-time">2016-01-20 18:46:30</span>
+						<span class="post-time">2016-01-20 18:53:45</span>
 					</div>	
 					
 
 					<div class="article-content">
-						
+						<p>Problem: Rotate an array of n elements to the right by k steps. For example, with n = 7 and k = 3, the array [1,2,3,4,5,6,7] is rotated to [5,6,7,1,2,3,4].</p>
+<p>How many different ways do you know to solve this problem?</p>
+<h3 id="Solution_1_-_Intermediate_Array"><a href="#Solution_1_-_Intermediate_Array" class="headerlink" title="Solution 1 - Intermediate Array"></a>Solution 1 - Intermediate Array</h3><p>In a straightforward way, we can create a new array and then copy elements to the new array. Then change the original array by using System.arraycopy() .</p>
+<pre><code>public void rotate(int[] nums, int k) {
+  if(k &gt; nums.length)
+    k=k%nums.length;
+  int[] result = new int[nums.length];
+  for(int i=0; i &lt; k; i++){
+    result[i] = nums[nums.length-k+i];
+  }
+  int j=0;
+  for(int i=k; i&lt;nums.length; i++){
+    result[i] = nums[j];
+    j++;
+  }
+  System.arraycopy( result, 0, nums, 0, nums.length );
+}
+</code></pre><p>Space is O(n) and time is O(n).</p>
+<h3 id="Solution_2_-_Bubble_Rotate"><a href="#Solution_2_-_Bubble_Rotate" class="headerlink" title="Solution 2 - Bubble Rotate"></a>Solution 2 - Bubble Rotate</h3><p>Can we do this in O(1) space?</p>
+<p>This solution is like a bubble sort.</p>
+<pre><code>public static void rotate(int[] arr, int order) {
+  if (arr == null || order &lt; 0) {
+      throw new IllegalArgumentException(&quot;Illegal argument!&quot;);
+  }
+
+  for (int i = 0; i &lt; order; i++) {
+    for (int j = arr.length - 1; j &gt; 0; j--) {
+      int temp = arr[j];
+      arr[j] = arr[j - 1];
+      arr[j - 1] = temp;
+    }
+  }
+}
+</code></pre><p>However, the time is O(n*k).</p>
+<h3 id="Solution_3_-_Reversal"><a href="#Solution_3_-_Reversal" class="headerlink" title="Solution 3 - Reversal"></a>Solution 3 - Reversal</h3><p>Can we do this in O(1) space and in O(n) time? The following solution does.</p>
+<p>Assuming we are given {1,2,3,4,5,6} and order 2. The basic idea is:</p>
+<ol>
+<li>Divide the array two parts: 1,2,3,4 and 5, 6</li>
+<li>Rotate first part: 4,3,2,1,5,6</li>
+<li>Rotate second part: 4,3,2,1,6,5</li>
+<li><p>Rotate the whole array: 5,6,1,2,3,4</p>
+<pre><code>public static void rotate(int[] arr, int order) {
+  order = order % arr.length;
+  if (arr == null || order &lt; 0) {
+    throw new IllegalArgumentException(&quot;Illegal argument!&quot;);
+  }
+  //length of first part
+  int a = arr.length - order;
+
+  reverse(arr, 0, a-1);
+  reverse(arr, a, arr.length-1);
+  reverse(arr, 0, arr.length-1);
+}
+public static void reverse(int[] arr, int left, int right){
+  if(arr == null || arr.length == 1)
+    return;
+  while(left &lt; right){
+    int temp = arr[left];
+    arr[left] = arr[right];
+    arr[right] = temp;
+    left++;
+    right--;
+  }
+}
+</code></pre></li>
+</ol>
+
 					</div>
 
 			  <!-- about -->
@@ -135,7 +203,7 @@
   
   
    <!-- 多说评论框 start -->
-    <div class="ds-thread" data-thread-key="about/index.md" data-title="about" data-url="http://beautygirl.ren/about/index.html"></div>
+    <div class="ds-thread" data-thread-key="_posts/2015-11-20-RotateArray.md" data-title="Rotate Array" data-url="http://beautygirl.ren/2016/01/20/2015-11-20-RotateArray/"></div>
     <!-- 多说评论框 end -->
    <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
     <script type="text/javascript">

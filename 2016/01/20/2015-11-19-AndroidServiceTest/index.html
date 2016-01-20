@@ -1,0 +1,433 @@
+	<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>ServiceTest | 眷恋似水</title>
+  <meta name="author" content="眷恋似水">
+  
+  <meta name="description" content="#Learn Android (Service)[day one] .
+##MainActivity.java
+package com.example.administrator.servicetest;
+
+import android.content.ComponentName;
+import a">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="ServiceTest"/>
+  <meta property="og:site_name" content="眷恋似水"/>
+
+  
+  
+		<!-- favicon -->
+		<link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+		<link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+		<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+		<link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+		<link rel="manifest" href="/manifest.json">
+		<meta name="msapplication-TileColor" content="#009688">
+		<meta name="msapplication-TileImage" content="/mstile-144x144.png">
+		<meta name="theme-color" content="#009688">
+		<!-- favicon end -->
+    <!-- <link href="/favicon.ico" rel="icon"> -->
+  
+
+  <!-- toc -->
+  <link rel="stylesheet" href="/libs/tocify/jquery.tocify.css" media="screen" type="text/css">
+
+  <!-- <link rel="stylesheet" href="/libs/bs/css/bootstrap.min.css" media="screen" type="text/css"> -->
+  <link rel="stylesheet" href="//apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap.min.css" media="screen" type="text/css">
+
+  <!-- material design -->
+	<!-- <link rel="stylesheet" href="/libs/bs-material/css/ripples.min.css" media="screen" type="text/css"> -->
+  <link rel="stylesheet" href="//apps.bdimg.com/libs/bootstrap-material/0.3.0/css/ripples.min.css" media="screen" type="text/css">
+  <!-- <link rel="stylesheet" href="/libs/bs-material/css/material.min.css" media="screen" type="text/css"> -->
+	<link rel="stylesheet" href="//apps.bdimg.com/libs/bootstrap-material/0.3.0/css/material.min.css" media="screen" type="text/css">
+
+  <link rel="stylesheet" href="/css/highlight.light.css" media="screen" type="text/css">
+
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+
+  
+
+  
+
+  <script src="//apps.bdimg.com/libs/jquery/2.0.3/jquery.min.js"></script>
+	<script>window.jQuery || document.write('<script src="/libs/jquery-2.0.3.min.js" type="text/javascript"><\/script>')</script>
+
+</head>
+
+ 	<body>
+	  <nav class="navbar navbar-default">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">菜单</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">眷恋似水</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                
+                <li>
+                    <a href="/" title="">
+                    <i class="fa fa-home"></i>首页
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="/archives" title="">
+                    <i class="fa fa-list"></i>存档
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="/about" title="">
+                    <i class="fa fa-info-circle"></i>关于
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="/atom.xml" title="这是一个订阅源">
+                    <i class="fa fa-rss"></i>RSS
+                    </a>
+                </li>
+                
+            </ul>
+        </div>
+    </div>
+</nav>
+
+	  <div class="container" >
+	    <div class="row">
+	
+	<div class="col-md-9 center-content">
+	
+
+		<div class="content">
+			<!-- index -->
+		   
+
+			  		<h2>ServiceTest</h2>
+					
+					<div>
+						<span class="post-time">2016-01-20 18:53:45</span>
+					</div>	
+					
+
+					<div class="article-content">
+						<p>#Learn Android (Service)[day one] .</p>
+<p>##MainActivity.java</p>
+<pre><code>package com.example.administrator.servicetest;
+
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.os.Message;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, ServiceConnection {
+    private EditText editText;
+    private TextView textView;
+    private Intent intent;
+    private MyService.Binder binder = null;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, &quot;Replace with your own action&quot;, Snackbar.LENGTH_LONG)
+                        .setAction(&quot;Action&quot;, null).show();
+            }
+        });
+
+
+        textView = (TextView) findViewById(R.id.textView);
+        editText = (EditText) findViewById(R.id.edit);
+
+        findViewById(R.id.stop).setOnClickListener(this);
+        findViewById(R.id.start).setOnClickListener(this);
+        findViewById(R.id.bind).setOnClickListener(this);
+        findViewById(R.id.unbind).setOnClickListener(this);
+        findViewById(R.id.sync).setOnClickListener(this);
+
+        intent = new Intent(MainActivity.this,MyService.class);
+        intent.putExtra(&quot;data&quot;, editText.getText().toString());
+
+
+
+    }
+
+
+    @Override
+    public void onClick(View v) {
+            switch (v.getId()){
+                case R.id.start:
+                    startService(intent);
+                    break;
+                case R.id.stop:
+                    stopService(intent);
+                    break;
+                case R.id.bind:
+                    bindService(intent,this, Context.BIND_AUTO_CREATE);
+                    break;
+                case R.id.unbind:
+                    unbindService(this);
+                    break;
+                case R.id.sync:
+                    if(binder != null){
+                        binder.setData(editText.getText().toString());
+                    }
+                    break;
+
+
+            }
+    }
+
+
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        binder = (MyService.Binder) service;
+
+        binder.getService().setCallBack(new MyService.CallBack() {
+            @Override
+            public void onDataChange(String data) {
+                Message msg = new Message();
+                Bundle b = new Bundle();
+                b.putString(&quot;data&quot;,data);
+                msg.setData(b);
+                handler.sendMessage(msg);
+            }
+        });
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+
+    }
+
+    private android.os.Handler handler = new android.os.Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            textView.setText(msg.getData().getString(&quot;data&quot;));
+        }
+    };
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+}
+</code></pre><p>##MyService.java</p>
+<pre><code>package com.example.administrator.servicetest;
+
+import android.app.Service;
+import android.content.Intent;
+import android.os.Binder;
+import android.os.IBinder;
+
+public class MyService extends Service {
+
+    private static int number = 0;
+    private boolean running = false;
+    private String dataChange = null;
+
+
+    public MyService() {
+
+    }
+    @Override
+    public IBinder onBind(Intent intent) {
+       return new Binder();
+    }
+
+    public class Binder extends android.os.Binder{
+        public void setData(String data){
+            MyService.this.dataChange = data;
+        }
+        public MyService getService(){
+            return MyService.this;
+        }
+    }
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        System.out.println(&quot;start Command&quot;);
+        dataChange = intent.getStringExtra(&quot;data&quot;);
+
+        return super.onStartCommand(intent, flags, startId);
+    }
+    @Override
+    public void onCreate() {
+        System.out.println(&quot;service start!&quot;);
+        super.onCreate();
+
+        new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                running = true;
+
+                while (running) {
+                    String str = number+&quot;:&quot;+dataChange;
+                    System.out.println(str);
+                    if(callBack != null){
+                        callBack.onDataChange(str);
+                    }
+
+                    number++;
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }.start();
+    }
+    @Override
+    public void onDestroy() {
+
+        super.onDestroy();
+        running = false;
+        System.out.println(&quot;service stop!&quot;);
+    }
+
+    public static interface CallBack{
+        void onDataChange(String data);
+    }
+    private CallBack callBack = null;
+
+    public void setCallBack(CallBack callBack) {
+        this.callBack = callBack;
+    }
+
+    public CallBack getCallBack() {
+        return callBack;
+    }
+}
+</code></pre><p>目前已知Bug或未能实现，前台传入后台数据无法实时更新到前台显示。</p>
+
+					</div>
+
+			  <!-- about -->
+			  
+		</div>
+
+		<!-- pagination -->
+	  
+
+		<div class="comment-section">
+  
+  
+   <!-- 多说评论框 start -->
+    <div class="ds-thread" data-thread-key="_posts/2015-11-19-AndroidServiceTest.md" data-title="ServiceTest" data-url="http://beautygirl.ren/2016/01/20/2015-11-19-AndroidServiceTest/"></div>
+    <!-- 多说评论框 end -->
+   <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+    <script type="text/javascript">
+    var duoshuoQuery = {short_name:'眷恋似水'};
+      (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+      })();
+      </script>
+    <!-- 多说公共JS代码 end -->
+  
+
+
+</div>
+	</div>
+
+	
+
+</div>
+
+
+		<footer>
+			
+
+<p>
+  由 <a href="https://hexo.io">hexo</a> 强力驱动 | 搭载 <a href="https://github.com/wayou/hexo-theme-material">material</a> 主题
+</p>
+<p>
+  &copy; 2016 <a href="http://beautygirl.ren"> 眷恋似水 </a>
+</p>
+<a id="gotop" href="#" title="back to top"><i class="mdi-hardware-keyboard-arrow-up"></i></a>
+
+		</footer>
+	  </div>
+
+		<!-- <script src="/libs/bs/js/bootstrap.min.js"></script> -->
+		<script src="//apps.bdimg.com/libs/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+		<script>(typeof $().modal == 'function')|| document.write('<script src="/libs/bs/js/bootstrap.min.js" type="text/javascript"><\/script>')</script>
+
+		<!-- material design -->
+		<!-- <script src="/libs/bs-material/js/ripples.min.js"></script> -->
+		<script src="//apps.bdimg.com/libs/bootstrap-material/0.3.0/js/ripples.min.js"></script>
+		<!-- <script src="/libs/bs-material/js/material.min.js"></script> -->
+		<script src="//apps.bdimg.com/libs/bootstrap-material/0.3.0/js/material.min.js"></script>
+		<!-- toc -->
+		<!-- <script src="/libs/tocify/jquery-ui.min.js"></script> -->
+		<script src="//apps.bdimg.com/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+		<script src="/libs/tocify/jquery.tocify.custom.js"></script>
+
+		<script src="/js/main.js"></script>
+
+	</body>
+</html>

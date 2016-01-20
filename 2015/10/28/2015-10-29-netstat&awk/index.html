@@ -1,0 +1,395 @@
+	<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>netatat &amp; awk | 眷恋似水</title>
+  <meta name="author" content="眷恋似水">
+  
+  <meta name="description" content="最近在优化nginx高并发，开始一直不明白这个awk什么什么意思，看到这个帖子不错，就分享了
+netstat -n | awk &amp;apos;/^tcp/ {++state[$NF]} END {for(key in state) print key,&amp;quot;\t&amp;quot;,state[key]">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="netatat &amp; awk"/>
+  <meta property="og:site_name" content="眷恋似水"/>
+
+  
+  
+		<!-- favicon -->
+		<link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+		<link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+		<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+		<link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+		<link rel="manifest" href="/manifest.json">
+		<meta name="msapplication-TileColor" content="#009688">
+		<meta name="msapplication-TileImage" content="/mstile-144x144.png">
+		<meta name="theme-color" content="#009688">
+		<!-- favicon end -->
+    <!-- <link href="/favicon.ico" rel="icon"> -->
+  
+
+  <!-- toc -->
+  <link rel="stylesheet" href="/libs/tocify/jquery.tocify.css" media="screen" type="text/css">
+
+  <!-- <link rel="stylesheet" href="/libs/bs/css/bootstrap.min.css" media="screen" type="text/css"> -->
+  <link rel="stylesheet" href="//apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap.min.css" media="screen" type="text/css">
+
+  <!-- material design -->
+	<!-- <link rel="stylesheet" href="/libs/bs-material/css/ripples.min.css" media="screen" type="text/css"> -->
+  <link rel="stylesheet" href="//apps.bdimg.com/libs/bootstrap-material/0.3.0/css/ripples.min.css" media="screen" type="text/css">
+  <!-- <link rel="stylesheet" href="/libs/bs-material/css/material.min.css" media="screen" type="text/css"> -->
+	<link rel="stylesheet" href="//apps.bdimg.com/libs/bootstrap-material/0.3.0/css/material.min.css" media="screen" type="text/css">
+
+  <link rel="stylesheet" href="/css/highlight.light.css" media="screen" type="text/css">
+
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+
+  
+
+  
+
+  <script src="//apps.bdimg.com/libs/jquery/2.0.3/jquery.min.js"></script>
+	<script>window.jQuery || document.write('<script src="/libs/jquery-2.0.3.min.js" type="text/javascript"><\/script>')</script>
+
+</head>
+
+ 	<body>
+	  <nav class="navbar navbar-default">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">菜单</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">眷恋似水</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                
+                <li>
+                    <a href="/" title="">
+                    <i class="fa fa-home"></i>首页
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="/archives" title="">
+                    <i class="fa fa-list"></i>存档
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="/about" title="">
+                    <i class="fa fa-info-circle"></i>关于
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="/atom.xml" title="这是一个订阅源">
+                    <i class="fa fa-rss"></i>RSS
+                    </a>
+                </li>
+                
+            </ul>
+        </div>
+    </div>
+</nav>
+
+	  <div class="container" >
+	    <div class="row">
+	
+	<div class="col-md-9 center-content">
+	
+
+		<div class="content">
+			<!-- index -->
+		   
+
+			  		<h2>netatat &amp; awk</h2>
+					
+					<div>
+						<span class="post-time">2015-10-28 23:58:34</span>
+					</div>	
+					
+
+					<div class="article-content">
+						<p>最近在优化nginx高并发，开始一直不明白这个awk什么什么意思，看到这个帖子不错，就分享了<br><img src="https://raw.githubusercontent.com/hushaoqing/hushaoqing.github.io/master/_posts/netstat.png" alt="alt text"></p>
+<pre><code>netstat -n | awk &apos;/^tcp/ {++state[$NF]} END {for(key in state) print key,&quot;\t&quot;,state[key]}&apos;
+</code></pre><p>会得到类似下面的结果，具体数字会有所不同：</p>
+<ul>
+<li>LAST_ACK         1</li>
+<li>SYN_RECV         14</li>
+<li>ESTABLISHED      79</li>
+<li>FIN_WAIT1        28</li>
+<li>FIN_WAIT2        3</li>
+<li>CLOSING          5</li>
+<li>TIME_WAIT        1669</li>
+</ul>
+<p>也就是说，这条命令可以把当前系统的网络连接状态分类汇总。</p>
+<p>状态：描述</p>
+<ul>
+<li>CLOSED：无连接是活动的或正在进行</li>
+<li>LISTEN：服务器在等待进入呼叫</li>
+<li>SYN_RECV：一个连接请求已经到达，等待确认</li>
+<li>SYN_SENT：应用已经开始，打开一个连接</li>
+<li>ESTABLISHED：正常数据传输状态</li>
+<li>FIN_WAIT1：应用说它已经完成</li>
+<li>FIN_WAIT2：另一边已同意释放</li>
+<li>ITMED_WAIT：等待所有分组死掉</li>
+<li>CLOSING：两边同时尝试关闭</li>
+<li>TIME_WAIT：另一边已初始化一个释放</li>
+<li>LAST_ACK：等待所有分组死掉</li>
+</ul>
+<p>下面解释一下为啥要这样写：</p>
+<p>一个简单的管道符连接了netstat和awk命令。</p>
+<hr>
+<p>先来看看netstat：</p>
+<pre><code>netstat -n
+
+  Active Internet connections (w/o servers) Proto   Recv-Q   Send-Q    Local Address    Foreign Address  State
+      tcp                      0              0            123.123.123.123:80    234.234.234.234:12345  TIME_WAIT
+</code></pre><p>你实际执行这条命令的时候，可能会得到成千上万条类似上面的记录，不过我们就拿其中的一条就足够了。</p>
+<hr>
+<p>再来看看awk：</p>
+<pre><code>/^tcp/
+</code></pre><p>滤出tcp开头的记录，屏蔽udp, socket等无关记录。</p>
+<pre><code>state[]
+</code></pre><p>相当于定义了一个名叫state的数组</p>
+<pre><code>NF
+</code></pre><p>表示记录的字段数，如上所示的记录，NF等于6</p>
+<pre><code>$NF
+</code></pre><p>表示某个字段的值，如上所示的记录，$NF也就是$6，表示第6个字段的值，也就是TIME_WAIT</p>
+<pre><code>state[$NF]
+</code></pre><p>表示数组元素的值，如上所示的记录，就是state[TIME_WAIT]状态的连接数</p>
+<pre><code>++state[$NF]
+</code></pre><p>表示把某个数加一，如上所示的记录，就是把state[TIME_WAIT]状态的连接数加一</p>
+<pre><code>END
+</code></pre><p>表示在最后阶段要执行的命令</p>
+<pre><code>for(key in state)
+</code></pre><p>遍历数组</p>
+<pre><code>print key,&quot;\t&quot;,state[key]
+</code></pre><p>打印数组的键和值，中间用\t制表符分割，美化一下。</p>
+<pre><code>netstat -n | awk &apos;/^tcp/ {++state[$NF]} END {for(key in state) print key,&quot;\t&quot;,state[key]}&apos;
+</code></pre><p>状态：描述</p>
+<ul>
+<li>CLOSED：无连接是活动的或正在进行</li>
+<li>LISTEN：服务器在等待进入呼叫</li>
+<li>SYN_RECV：一个连接请求已经到达，等待确认</li>
+<li>SYN_SENT：应用已经开始，打开一个连接</li>
+<li>ESTABLISHED：正常数据传输状态</li>
+<li>FIN_WAIT1：应用说它已经完成</li>
+<li>FIN_WAIT2：另一边已同意释放</li>
+<li>ITMED_WAIT：等待所有分组死掉</li>
+<li>CLOSING：两边同时尝试关闭</li>
+<li>TIME_WAIT：另一边已初始化一个释放</li>
+<li>LAST_ACK：等待所有分组死掉</li>
+</ul>
+<p>如发现系统存在大量TIME_WAIT状态的连接，通过调整内核参数解决.</p>
+<pre><code>vim /etc/sysctl.conf
+</code></pre><p>编辑文件，加入以下内容：</p>
+<pre><code>net.ipv4.tcp_syncookies = 1
+net.ipv4.tcp_tw_reuse = 1
+net.ipv4.tcp_tw_recycle = 1
+net.ipv4.tcp_fin_timeout = 30
+</code></pre><p>然后执行 /sbin/sysctl -p 让参数生效。</p>
+<pre><code>net.ipv4.tcp_syncookies = 1
+</code></pre><p>表示开启SYN cookies。当出现SYN等待队列溢出时，启用cookies来处理，可防范少量SYN攻击，默认为0，表示关闭；</p>
+<pre><code>net.ipv4.tcp_tw_reuse = 1
+</code></pre><p>表示开启重用。允许将TIME-WAIT<br> sockets重新用于新的TCP连接，默认为0，表示关闭；</p>
+<pre><code>net.ipv4.tcp_tw_recycle = 1
+</code></pre><p>表示开启TCP连接中TIME-WAIT sockets的快速回收，默认为0，表示关闭。</p>
+<pre><code>net.ipv4.tcp_fin_timeout
+</code></pre><p>修改系通默认的 TIMEOUT 时间</p>
+<p>下面附上TIME_WAIT状态的意义：</p>
+<p>客户端与服务器端建立TCP/IP连接后关闭SOCKET后，服务器端连接的端口<br>状态为TIME_WAIT</p>
+<p>是不是所有执行主动关闭的socket都会进入TIME_WAIT状态呢？<br>有没有什么情况使主动关闭的socket直接进入CLOSED状态呢？</p>
+<p>主动关闭的一方在发送最后一个 ack 后<br>就会进入 TIME_WAIT 状态 停留2MSL（max segment lifetime）时间<br>这个是TCP/IP必不可少的，也就是“解决”不了的。</p>
+<p>也就是TCP/IP设计者本来是这么设计的<br>主要有两个原因</p>
+<ol>
+<li>防止上一次连接中的包，迷路后重新出现，影响新连接<br>（经过2MSL，上一次连接中所有的重复包都会消失）</li>
+<li>可靠的关闭TCP连接<br>在主动关闭方发送的最后一个 ack(fin) ，有可能丢失，这时被动方会重新发<br>fin, 如果这时主动方处于 CLOSED 状态 ，就会响应 rst 而不是 ack。所以<br>主动方要处于 TIME_WAIT 状态，而不能是 CLOSED 。</li>
+</ol>
+<p>TIME_WAIT 并不会占用很大资源的，除非受到攻击。</p>
+<p>还有，如果一方 send 或 recv 超时，就会直接进入 CLOSED 状态</p>
+<p><a href="http://www.51testing.com/?uid-11 ... space-itemid-219725" target="_blank" rel="external">来源</a></p>
+<p>##系统连接状态篇：</p>
+<ol>
+<li><p>查看TCP连接状态</p>
+<pre><code>netstat -nat |awk &apos;{print $6}&apos;|sort|uniq -c|sort -rn
+netstat -n |awk &apos;/^tcp/ {++S[$NF]};END {for(a in S) print a,S[a]}&apos;
+netstat -n |awk &apos;/^tcp/ {++state[$NF]} END {for(key in state) print/^tcp/
+</code></pre><p>滤出tcp开头的记录，屏蔽udp,socket等无关记录。</p>
+<pre><code>state[]
+</code></pre><p>相当于定义了一个名叫state的数组</p>
+<pre><code>NF
+</code></pre><p>表示记录的字段数，如上所示的记录，NF等于6</p>
+<pre><code>$NF
+</code></pre><p>表示某个字段的值，如上所示的记录，$NF也就是$6，表示第6个字段的值，也就是TIME_WAIT</p>
+<pre><code>state[$NF]
+</code></pre><p>表示数组元素的值，如上所示的记录，就是state[TIME_WAIT]状态的连接数</p>
+<pre><code>++state[$NF]
+</code></pre><p>表示把某个数加一，如上所示的记录，就是把state[TIME_WAIT]状态的连接数加一</p>
+<pre><code>END
+</code></pre><p>表示在最后阶段要执行的命令</p>
+<pre><code>for(key in state)
+</code></pre><p>遍历数组</p>
+<pre><code>print key,&quot;\t&quot;,state[key]
+</code></pre><p>打印数组的键和值，中间用\t制表符分割，美化一下。</p>
+<pre><code>netstat -n |awk &apos;/^tcp/ {++state[$NF]}; END {for(key in state) print key,&quot;\t&quot;,state[key]}&apos;
+netstat -n |awk &apos;/^tcp/ {++arr[$NF]};END {for(k in arr) print k,&quot;\t&quot;,arr[k]}&apos;
+netstat -n |awk &apos;/^tcp/ {print $NF}&apos;|sort|uniq -c|sort -rn
+netstat -ant |awk &apos;{print $NF}&apos;|grep -v &apos;[a-z]&apos;|sort |uniq -c
+netstat -ant|awk &apos;/ip:80/{split($5,ip,&quot;:&quot;);++S[ip[1]]}END{for (a in S) print S[a],a}&apos;|sort -n
+netstat -ant|awk &apos;/:80/{split($5,ip,&quot;:&quot;);++S[ip[1]]}END{for (a in S) print S[a],a}&apos;|sort -rn|head -n 10awk &apos;BEGIN{printf (&quot;http_code\tcount_num\n&quot;)}{COUNT[$10]++}END{for (a in COUNT) printf a&quot;\t\t&quot;COUNT[a]&quot;\n&quot;}&apos;
+</code></pre></li>
+</ol>
+<ol>
+<li><p>查找请求数请20个IP（常用于查找攻来源）：</p>
+<pre><code>netstat -anlp|grep 80|grep tcp|awk &apos;{print $5}&apos;|awk -F:&apos;{print $1}&apos;|sort|uniq -c|sort -nr|head -n20
+netstat -ant |awk &apos;/:80/{split($5,ip,&quot;:&quot;);++A[ip[1]]}END{for(i in A) print A,i}&apos;|sort -rn|head -n20
+</code></pre></li>
+<li><p>用tcpdump嗅探80端口的访问看看谁最高</p>
+<pre><code>tcpdump -i eth0 -tnn dst port 80-c 1000|awk -F&quot;.&quot;&apos;{print $1&quot;.&quot;$2&quot;.&quot;$3&quot;.&quot;$4}&apos;|sort |uniq -c |sort -nr |head -20
+</code></pre></li>
+<li><p>查找较多time_wait连接</p>
+<pre><code>netstat -n|grep TIME_WAIT|awk &apos;{print $5}&apos;|sort|uniq -c|sort -rn|head -n20
+</code></pre></li>
+<li><p>找查较多的SYN连接</p>
+<pre><code>netstat -an |grep SYN |awk &apos;{print $5}&apos;|awk -F:&apos;{print $1}&apos;|sort |uniq -c |sort -nr |more
+</code></pre></li>
+<li><p>根据端口列进程</p>
+<pre><code>netstat -ntlp |grep 80|awk &apos;{print $7}&apos;|cut -d/-f1
+</code></pre></li>
+</ol>
+<p>###网站日志分析篇1（Apache）：</p>
+<ol>
+<li><p>获得访问前10位的ip地址</p>
+<pre><code>cat access.log|awk &apos;{print $1}&apos;|sort|uniq -c|sort -nr|head -10
+cat access.log|awk &apos;{counts[$(11)]+=1}; END {for(url in counts) print counts[url], url}&apos;
+</code></pre></li>
+<li><p>访问次数最多的文件或页面,取前20</p>
+<pre><code>cat access.log|awk &apos;{print $11}&apos;|sort|uniq -c|sort -nr|head -20
+</code></pre></li>
+<li><p>列出传输最大的几个exe文件（分析下载站的时候常用）</p>
+<pre><code>cat access.log |awk &apos;($7~/\.exe/){print $10 &quot; &quot; $1 &quot; &quot; $4 &quot; &quot; $7}&apos;|sort -nr|head -20
+</code></pre></li>
+<li><p>列出输出大于200000byte(约200kb)的exe文件以及对应文件发生次数</p>
+<pre><code>cat access.log |awk &apos;($10 &gt; 200000 &amp;&amp; $7~/\.exe/){print $7}&apos;|sort -n|uniq -c|sort -nr|head -100
+</code></pre></li>
+<li><p>如果日志最后一列记录的是页面文件传输时间，则有列出到客户端最耗时的页面</p>
+<pre><code>cat access.log |awk &apos;($7~/\.php/){print $NF &quot; &quot; $1 &quot; &quot; $4 &quot; &quot; $7}&apos;|sort -nr|head -100
+</code></pre></li>
+<li><p>列出最最耗时的页面(超过60秒的)的以及对应页面发生次数</p>
+<pre><code>cat access.log |awk &apos;($NF &gt; 60 &amp;&amp; $7~/\.php/){print $7}&apos;|sort -n|uniq -c|sort -nr|head -100
+</code></pre></li>
+<li><p>列出传输时间超过 30 秒的文件</p>
+<pre><code>cat access.log |awk &apos;($NF &gt; 30){print $7}&apos;|sort -n|uniq -c|sort -nr|head -20
+</code></pre></li>
+<li><p>统计网站流量（G)</p>
+<pre><code>cat access.log |awk &apos;{sum+=$10} END {print sum/1024/1024/1024}&apos;
+</code></pre></li>
+<li><p>统计404的连接</p>
+<pre><code>awk &apos;($9 ~/404/)&apos;access.log |awk &apos;{print $9,$7}&apos;|sort
+</code></pre></li>
+<li><p>统计http status.</p>
+<pre><code>cat access.log |awk &apos;{counts[$(9)]+=1}; END {for(code in counts) print code, counts[code]}&apos;cat access.log |awk &apos;{print $9}&apos;|sort|uniq -c|sort -rn
+</code></pre></li>
+<li><p>每秒并发：</p>
+<pre><code>awk &apos;{if($9~/200|30|404/)COUNT[$4]++}END{for( a in COUNT) print a,COUNT[a]}&apos;|sort -k 2-nr|head -n10
+</code></pre></li>
+<li><p>带宽统计</p>
+<pre><code>cat apache.log |awk &apos;{if($7~/GET/) count++}END{print &quot;client_request=&quot;count}&apos;cat apache.log |awk &apos;{BYTE+=$11}END{print &quot;client_kbyte_out=&quot;BYTE/1024&quot;KB&quot;}&apos;
+</code></pre></li>
+<li><p>统计对象数量及对象平均大小</p>
+<pre><code>cat access.log |awk &apos;{byte+=$10}END{ print byte/NR/1024,NR}&apos;cat access.log |awk &apos;{if($9~/200|30/)COUNT[$NF]++}END{for( a in COUNT) print a,COUNT[a],NR,COUNT[a]/NR*100&quot;%&quot;}
+</code></pre></li>
+<li><p>取5分钟日志</p>
+<pre><code>if[$DATE_MINUTE !=$DATE_END_MINUTE ];then#则判断开始时间戳与结束时间戳是否相等START_LINE=`sed -n &quot;/$DATE_MINUTE/=&quot; $APACHE_LOG|head -n1`#如果不相等，则取出开始时间戳的行号，与结束时间戳的行号#END_LINE=`sed -n &quot;/$DATE_END_MINUTE/=&quot; $APACHE_LOG|tail -n1`END_LINE=`sed -n &quot;/$DATE_END_MINUTE/=&quot; $APACHE_LOG|head -n1`sed -n &quot;${START_LINE},${END_LINE}p&quot;$APACHE_LOG &gt;$MINUTE_LOG ##通过行号，取出5分钟内的日志内容 存放到 临时文件中GET_START_TIME=`sed -n &quot;${START_LINE}p&quot; $APACHE_LOG|awk -F &apos;[&apos; &apos;{print $2}&apos; |awk &apos;{print $1}&apos;|sed &apos;s#/# #g&apos;|sed &apos;s#:# #&apos;`#通过行号获取取出开始时间戳GET_END_TIME=`sed -n &quot;${END_LINE}p&quot; $APACHE_LOG|awk -F &apos;[&apos; &apos;{print $2}&apos; |awk &apos;{print $1}&apos;|sed&apos;s#/# #g&apos;|sed &apos;s#:# #&apos;`#通过行号获取结束时间戳
+</code></pre></li>
+<li><p>查看数据库执行的sql</p>
+<pre><code>/usr/sbin/tcpdump -i eth0 -s 0-l -w -dst port 3306|strings |egrep -i &apos;SELECT|UPDATE|DELETE|INSERT|SET|COMMIT|ROLLBACK|CREATE|DROP|ALTER|CALL&apos;
+</code></pre></li>
+</ol>
+
+					</div>
+
+			  <!-- about -->
+			  
+		</div>
+
+		<!-- pagination -->
+	  
+
+		<div class="comment-section">
+  
+  
+   <!-- 多说评论框 start -->
+    <div class="ds-thread" data-thread-key="_posts/2015-10-29-netstat&amp;awk.md" data-title="netatat &amp; awk" data-url="http://beautygirl.ren/2015/10/28/2015-10-29-netstat&amp;awk/"></div>
+    <!-- 多说评论框 end -->
+   <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+    <script type="text/javascript">
+    var duoshuoQuery = {short_name:'眷恋似水'};
+      (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+      })();
+      </script>
+    <!-- 多说公共JS代码 end -->
+  
+
+
+</div>
+	</div>
+
+	
+
+</div>
+
+
+		<footer>
+			
+
+<p>
+  由 <a href="https://hexo.io">hexo</a> 强力驱动 | 搭载 <a href="https://github.com/wayou/hexo-theme-material">material</a> 主题
+</p>
+<p>
+  &copy; 2016 <a href="http://beautygirl.ren"> 眷恋似水 </a>
+</p>
+<a id="gotop" href="#" title="back to top"><i class="mdi-hardware-keyboard-arrow-up"></i></a>
+
+		</footer>
+	  </div>
+
+		<!-- <script src="/libs/bs/js/bootstrap.min.js"></script> -->
+		<script src="//apps.bdimg.com/libs/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+		<script>(typeof $().modal == 'function')|| document.write('<script src="/libs/bs/js/bootstrap.min.js" type="text/javascript"><\/script>')</script>
+
+		<!-- material design -->
+		<!-- <script src="/libs/bs-material/js/ripples.min.js"></script> -->
+		<script src="//apps.bdimg.com/libs/bootstrap-material/0.3.0/js/ripples.min.js"></script>
+		<!-- <script src="/libs/bs-material/js/material.min.js"></script> -->
+		<script src="//apps.bdimg.com/libs/bootstrap-material/0.3.0/js/material.min.js"></script>
+		<!-- toc -->
+		<!-- <script src="/libs/tocify/jquery-ui.min.js"></script> -->
+		<script src="//apps.bdimg.com/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+		<script src="/libs/tocify/jquery.tocify.custom.js"></script>
+
+		<script src="/js/main.js"></script>
+
+	</body>
+</html>

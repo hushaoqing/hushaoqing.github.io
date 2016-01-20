@@ -3,13 +3,17 @@
 <head>
   <meta charset="utf-8">
   
-  <title>about | 眷恋似水</title>
+  <title>hanoi | 眷恋似水</title>
   <meta name="author" content="眷恋似水">
+  
+  <meta name="description" content="算法：当只有一个盘子的时候，只需要从将A塔上的一个盘子移到C塔上。
+当A塔上有两个盘子是，先将A塔上的1号盘子（编号从上到下）移动到B塔上，再将A塔上的2号盘子移动的C塔上，最后将B塔上的小盘子移动到C塔上。
+当A塔上有3个盘子时，先将A塔上编号1至2的盘子（共2个）移动到B塔上（需借助C塔），然后">
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="about"/>
+  <meta property="og:title" content="hanoi"/>
   <meta property="og:site_name" content="眷恋似水"/>
 
   
@@ -113,15 +117,38 @@
 			<!-- index -->
 		   
 
-			  		<h2>about</h2>
+			  		<h2>hanoi</h2>
 					
 					<div>
-						<span class="post-time">2016-01-20 18:46:30</span>
+						<span class="post-time">2016-01-20 18:53:45</span>
 					</div>	
 					
 
 					<div class="article-content">
-						
+						<p>算法：当只有一个盘子的时候，只需要从将A塔上的一个盘子移到C塔上。</p>
+<p>当A塔上有两个盘子是，先将A塔上的1号盘子（编号从上到下）移动到B塔上，再将A塔上的2号盘子移动的C塔上，最后将B塔上的小盘子移动到C塔上。</p>
+<p>当A塔上有3个盘子时，先将A塔上编号1至2的盘子（共2个）移动到B塔上（需借助C塔），然后将A塔上的3号最大的盘子移动到C塔，最后将B塔上的两个盘子借助A塔移动到C塔上。</p>
+<p>当A塔上有n个盘子是，先将A塔上编号1至n-1的盘子（共n-1个）移动到B塔上（借助C塔），然后将A塔上最大的n号盘子移动到C塔上，最后将B塔上的n-1个盘子借助A塔移动到C塔上。</p>
+<p>综上所述，除了只有一个盘子时不需要借助其他塔外，其余情况均一样（只是事件的复杂程度不一样）。</p>
+<pre><code>def hanoi(n,x,y,z):
+    if n==1:
+        print(x,&apos;--&gt;&apos;,z)
+    else:
+        hanoi(n-1,x,z,y)
+        hanoi(1,x,y,z)
+        hanoi(n-1,y,x,z)
+n =int(input(&apos;enter the hanoi number:&apos;))
+hanoi(n,&apos;x&apos;,&apos;y&apos;,&apos;z&apos;)
+</code></pre><p>result:</p>
+<pre><code>enter the hanoi number:3
+x --&gt; z
+x --&gt; y
+z --&gt; y
+x --&gt; z
+y --&gt; x
+y --&gt; z
+x --&gt; z
+</code></pre>
 					</div>
 
 			  <!-- about -->
@@ -135,7 +162,7 @@
   
   
    <!-- 多说评论框 start -->
-    <div class="ds-thread" data-thread-key="about/index.md" data-title="about" data-url="http://beautygirl.ren/about/index.html"></div>
+    <div class="ds-thread" data-thread-key="_posts/2016-1-9-hanoiWithPython.md" data-title="hanoi" data-url="http://beautygirl.ren/2016/01/20/2016-1-9-hanoiWithPython/"></div>
     <!-- 多说评论框 end -->
    <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
     <script type="text/javascript">

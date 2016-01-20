@@ -3,13 +3,18 @@
 <head>
   <meta charset="utf-8">
   
-  <title>about | 眷恋似水</title>
+  <title>SICP-Scheme-01 | 眷恋似水</title>
   <meta name="author" content="眷恋似水">
+  
+  <meta name="description" content="##1.3定义一个过程，以三个数为参数，返回其中的较大的两数的平方和：
+(define (sum-max2-sqr a b c)   
+  (cond ((and (not (&amp;gt; c a)) (not (&amp;gt; c b)))  (+ (* a a) (* b b)))         
+  ">
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="about"/>
+  <meta property="og:title" content="SICP-Scheme-01"/>
   <meta property="og:site_name" content="眷恋似水"/>
 
   
@@ -113,15 +118,53 @@
 			<!-- index -->
 		   
 
-			  		<h2>about</h2>
+			  		<h2>SICP-Scheme-01</h2>
 					
 					<div>
-						<span class="post-time">2016-01-20 18:46:30</span>
+						<span class="post-time">2016-01-20 18:53:45</span>
 					</div>	
 					
 
 					<div class="article-content">
-						
+						<p>##1.3定义一个过程，以三个数为参数，返回其中的较大的两数的平方和：</p>
+<pre><code>(define (sum-max2-sqr a b c)   
+  (cond ((and (not (&gt; c a)) (not (&gt; c b)))  (+ (* a a) (* b b)))         
+        ((and (not (&gt; b a)) (not (&gt; b c)))  (+ (* a a) (* c c)))         
+        ((and (not (&gt; a b)) (not (&gt; a c)))  (+ (* b b) (* c c)))    
+   )
+)
+</code></pre><hr>
+<pre><code>(define  
+    (largest-two-square-sum x y z)  
+        (if (= x (larger x y))  
+            (sum-of-squares x (larger y z))  
+            (sum-of-squares y (larger x z))
+        )
+)
+
+(define  
+    (larger x y)  
+        (if (&gt; x y) x y)
+)
+
+(define  
+    (sum-of-squares x y)  
+        (+ (square x) (square y))
+)
+
+(define  
+    (square x)  
+        (* x x)
+)
+</code></pre><hr>
+<p>##1.5<br>    (define (p) (p))<br>    (define (test x y)<br>            if(= x 0) 0 y))</p>
+<p>#####applicative-order</p>
+<pre><code>(test o (p))
+(test o (p))
+(test o (p))
+</code></pre><p>#####normal-order</p>
+<pre><code>0
+</code></pre>
 					</div>
 
 			  <!-- about -->
@@ -135,7 +178,7 @@
   
   
    <!-- 多说评论框 start -->
-    <div class="ds-thread" data-thread-key="about/index.md" data-title="about" data-url="http://beautygirl.ren/about/index.html"></div>
+    <div class="ds-thread" data-thread-key="_posts/2015-11-11-learingScheme01.md" data-title="SICP-Scheme-01" data-url="http://beautygirl.ren/2016/01/20/2015-11-11-learingScheme01/"></div>
     <!-- 多说评论框 end -->
    <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
     <script type="text/javascript">

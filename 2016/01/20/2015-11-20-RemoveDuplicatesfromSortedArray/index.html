@@ -3,13 +3,15 @@
 <head>
   <meta charset="utf-8">
   
-  <title>about | 眷恋似水</title>
+  <title>Remove Duplicates from Sorted Array | 眷恋似水</title>
   <meta name="author" content="眷恋似水">
+  
+  <meta name="description" content="Remove Duplicates from Sorted ArrayGiven a sorted array, remove the duplicates in place such that each element appear only once and return the new len">
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="about"/>
+  <meta property="og:title" content="Remove Duplicates from Sorted Array"/>
   <meta property="og:site_name" content="眷恋似水"/>
 
   
@@ -113,15 +115,110 @@
 			<!-- index -->
 		   
 
-			  		<h2>about</h2>
+			  		<h2>Remove Duplicates from Sorted Array</h2>
 					
 					<div>
-						<span class="post-time">2016-01-20 18:46:30</span>
+						<span class="post-time">2016-01-20 18:53:45</span>
 					</div>	
 					
 
 					<div class="article-content">
-						
+						<h1 id="Remove_Duplicates_from_Sorted_Array"><a href="#Remove_Duplicates_from_Sorted_Array" class="headerlink" title="Remove Duplicates from Sorted Array"></a>Remove Duplicates from Sorted Array</h1><p>Given a sorted array, remove the duplicates in place such that each element appear only once and return the new length.</p>
+<p>Do not allocate extra space for another array, you must do this in place with constant memory.</p>
+<p>For example,<br>Given input array nums = [1,1,2],</p>
+<p>Your function should return length = 2, with the first two elements of nums being 1 and 2 respectively. It doesn’t matter what you leave beyond the new length.</p>
+<p>思路：</p>
+<ol>
+<li>这道题其实很简单。主要是因为数组已经是排好顺序的。如果不仔细看题目，把数组当作无序数组进行操作，OJ时会显示超时。</li>
+<li>题目要求是不能申请二额外空间，如果提交时有申请额外空间，也是不通过的。</li>
+<li>还需要注意的一个地方是，数组中元素的位置不能改变。比如对于数组[1,1,1,4,5]，移除重复元素后为[1,4,5]，起始数字为1，而不能是其它数字。</li>
+<li>我们只需对对组遍历一次，并设置一个计数器，每当遍历前后元素不相同，计数器加1，并将计数器对应在数组中位置定位到当前遍历的元素。</li>
+</ol>
+<pre><code>public class Solution {
+    public int removeDuplicates(int[] nums) {
+       int length = nums.length;
+        if(length == 0){
+            return 0;
+        }
+        int count = 1;
+       for(int i = 1;i &lt; length;i++){
+            if(nums[i] == nums[i-1]){
+                continue;
+             }
+             else{
+                nums[count] = nums[i];
+                  count++;
+             }
+          }
+         return count;
+     }
+  }
+</code></pre><p>上面的解法是针对有序数组，如果是无序数组，应该如何解答？</p>
+<p>思路：</p>
+<ol>
+<li>如果不允许申请额外空间，则可以先对数组进行排序，为了提高效率一般考虑使用快速排序，然后再参照上面有序数组进行操作；</li>
+<li>如果允许申请空间，则只需创建一个HashSet，遍历一次数组，通过contanins()方法进行判断就能得到结果。</li>
+<li>(1）和（2）所对应代码如下所示（注：针对本文所示的题目，如果用下面代码进行OJ，（1）会超时，（2）会产生额外空间）：</li>
+</ol>
+<p>不可以申请额外空间：</p>
+<pre><code>public static int removeDuplicates(int[] A) {
+    int len = A.length;
+    if (len == 0)
+        return 0;
+
+    quickSort(A, 0, len - 1);
+
+    int count = 1;
+    for (int i = 1; i &lt; len; i++) {
+        if (A[i] == A[i - 1]) {
+            continue;
+        } else {
+            A[count] = A[i];
+            count++;
+        }
+    }
+    return count;
+}
+
+//快速排序
+private static void quickSort(int[] table, int low, int high) {
+    if (low &lt; high) {
+        int i = low, j = high;
+        int vot = table[i];
+        while (i != j) {
+            while (i &lt; j &amp;&amp; vot &lt;= table[j])
+                j--;
+            if (i &lt; j) {
+                table[i] = table[j];
+                i++;
+            }
+            while (i &lt; j &amp;&amp; table[i] &lt; vot)
+                i++;
+            if (i &lt; j) {
+                table[j] = table[i];
+                j--;
+            }
+        }
+        table[i] = vot;
+        quickSort(table, low, j - 1);
+        quickSort(table, i + 1, high);
+    }
+}
+</code></pre><p>可以申请额外空间：（其中，HashSet的contains()方法是用来过滤重复元素的）</p>
+<pre><code>public static int removeDuplicates(int[] A) {
+    int len = A.length;
+    HashSet set = new HashSet();
+    for (int i = 0; i &lt; len; i++) {
+        if (set.size() == 0) {
+            set.add(A[i]);
+        }
+        if (!set.contains(A[i])) {
+            set.add(A[i]);
+        }
+    }
+    return set.size();
+}
+</code></pre>
 					</div>
 
 			  <!-- about -->
@@ -135,7 +232,7 @@
   
   
    <!-- 多说评论框 start -->
-    <div class="ds-thread" data-thread-key="about/index.md" data-title="about" data-url="http://beautygirl.ren/about/index.html"></div>
+    <div class="ds-thread" data-thread-key="_posts/2015-11-20-RemoveDuplicatesfromSortedArray.md" data-title="Remove Duplicates from Sorted Array" data-url="http://beautygirl.ren/2016/01/20/2015-11-20-RemoveDuplicatesfromSortedArray/"></div>
     <!-- 多说评论框 end -->
    <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
     <script type="text/javascript">

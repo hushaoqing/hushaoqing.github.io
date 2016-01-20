@@ -3,13 +3,17 @@
 <head>
   <meta charset="utf-8">
   
-  <title>about | 眷恋似水</title>
+  <title>quickSort | 眷恋似水</title>
   <meta name="author" content="眷恋似水">
+  
+  <meta name="description" content="举例说明一下,假设要排序的序列为2 4 9 3 6 7 1 5
+[2] 2 4 9 3 6 7 1 5 首先用2当基准，使用i,j两个指针分别从两边进行扫描，把比2小的元素和比2大的元素分开。首先比较2和5，5比2大，j左移
+[2] 2 4 9 3 6 7 1 5 比较2和1，1小于2，所以把1放在">
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="about"/>
+  <meta property="og:title" content="quickSort"/>
   <meta property="og:site_name" content="眷恋似水"/>
 
   
@@ -113,15 +117,41 @@
 			<!-- index -->
 		   
 
-			  		<h2>about</h2>
+			  		<h2>quickSort</h2>
 					
 					<div>
-						<span class="post-time">2016-01-20 18:46:30</span>
+						<span class="post-time">2016-01-20 18:53:45</span>
 					</div>	
 					
 
 					<div class="article-content">
-						
+						<p>举例说明一下,假设要排序的序列为2 4 9 3 6 7 1 5</p>
+<p>[2] 2 4 9 3 6 7 1 5 首先用2当基准，使用i,j两个指针分别从两边进行扫描，把比2小的元素和比2大的元素分开。首先比较2和5，5比2大，j左移</p>
+<p>[2] 2 4 9 3 6 7 1 5 比较2和1，1小于2，所以把1放在2的位置</p>
+<p>[2] 1 4 9 3 6 7 2 5 比较2和4，4大于2，因此将4移动到后面</p>
+<p>[2] 1 2 9 3 6 7 4 5 比较2和7，2和6，2和3，2和9，全部大于2，满足条件，因此不变<br>以上为一轮排序的情况。然后使用递归即可。</p>
+<p>简单代码如下：</p>
+<pre><code>int quickSort(int &amp;v,int left,int right)
+{
+  if(left &lt; right)
+  {
+    int key = v[left];
+    int pre = left;
+    int last = right;
+
+    while(pre &lt; last)
+    {
+      while(pre&lt;last &amp;&amp; key &lt; v[last]) last--;
+      v[pre] = v[last];
+      while(pre&lt;last &amp;&amp; key &gt; v[pre]) pre++;
+      v[last] = v[pre];
+    }
+    v[pre] = key;
+    quickSort(v,left,pre-1);
+    quickSort(v,pre+1,right);
+  }
+}
+</code></pre>
 					</div>
 
 			  <!-- about -->
@@ -135,7 +165,7 @@
   
   
    <!-- 多说评论框 start -->
-    <div class="ds-thread" data-thread-key="about/index.md" data-title="about" data-url="http://beautygirl.ren/about/index.html"></div>
+    <div class="ds-thread" data-thread-key="_posts/2016-1-8-quickSort.md" data-title="quickSort" data-url="http://beautygirl.ren/2016/01/20/2016-1-8-quickSort/"></div>
     <!-- 多说评论框 end -->
    <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
     <script type="text/javascript">
